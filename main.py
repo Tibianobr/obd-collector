@@ -4,6 +4,10 @@
 #
 # ## LINK PARA COMANDOS OBD - https://python-obd.readthedocs.io/en/latest/Command%20Tables/
 import obd
+import sched, time
+import configuration
+from database import Database
+db = Database()
 
 # Ativa DEBUGGER do OBD
 obd.logger.setLevel(obd.logging.DEBUG)
@@ -21,19 +25,40 @@ print("Supported commands: ")
 for command in commands:
     print(command.name)
 
-# Send a command
-while True:
-    command = input("Enter command (type 'quit' to exit): ")
-    if command == "quit":
-        break
+starttime = time.time()
+s = sched.scheduler(time.time, time.sleep)
+
+
+def collect_variable(sc,variable_name, variable_time):
+    print("COLLECT = ", variable_name, variable_time)
     try:
         response = connection.query(obd.commands[command])
-        print(response.value)
+        db.insert_values(variable_name, response.value)
+        print('DADO = ', variable_name, response.value)
     except Exception as ex:
         print("Error: " + str(ex))
+    sc.enter(int(variable_time), 1, collect_variable, (sc,variable_name,variable_time))
+
+
+for obd_variable_name, obd_variable_time in configuration.get_config().items():
+    print('SCHEDULED = ', obd_variable_name, obd_variable_time)
+    s.enter(int(obd_variable_time), 1, collect_variable, (s,obd_variable_name, obd_variable_time))
+s.run()
+
+
+# Send a command
+# while True:
+#     if keyboard.is_pressed('q'):
+#         break
+#     print(int(60.0 - ((time.time() - starttime) % 60.0)))
+    # try:
+    #     response = connection.query(obd.commands[command])
+    #     print(response.value)
+    # except Exception as ex:
+    #     print("Error: " + str(ex))
 
 # Close the connection
-connection.close()
+# connection.close()
 #
 # #####################################################
 #
