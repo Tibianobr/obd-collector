@@ -1,5 +1,4 @@
 import re
-import sqlite3
 import configuration
 from database import Database
 
