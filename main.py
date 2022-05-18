@@ -7,7 +7,7 @@ import obd
 import sched, time
 import configuration
 from database import Database
-db = Database()
+db = Database(configuration.get_db_name())
 
 # Ativa DEBUGGER do OBD
 obd.logger.setLevel(obd.logging.DEBUG)
@@ -32,7 +32,7 @@ s = sched.scheduler(time.time, time.sleep)
 def collect_variable(sc,variable_name, variable_time):
     print("COLLECT = ", variable_name, variable_time)
     try:
-        response = connection.query(obd.commands[command])
+        response = connection.query(obd.commands[variable_name])
         db.insert_values(variable_name, response.value)
         print('DADO = ', variable_name, response.value)
     except Exception as ex:
