@@ -32,7 +32,10 @@ s = sched.scheduler(time.time, time.sleep)
 def collect_variable(sc,variable_name, variable_time):
     print("COLLECT = ", variable_name, variable_time)
     try:
-        response = connection.query(obd.commands[variable_name])
+        if variable_name in configuration.get_force_variables():
+            response = connection.query(obd.commands[variable_name], force=True)
+        else:
+            response = connection.query(obd.commands[variable_name])
         db.insert_values(variable_name, response.value)
         print('DADO = ', variable_name, response.value)
     except Exception as ex:
@@ -40,10 +43,12 @@ def collect_variable(sc,variable_name, variable_time):
     sc.enter(int(variable_time), 1, collect_variable, (sc,variable_name,variable_time))
 
 
-for obd_variable_name, obd_variable_time in configuration.get_config().items():
+for obd_variable_name, obd_variable_value in configuration.get_config().items():
+    obd_variable_time = str(obd_variable_value).split(',')[1]
     print('SCHEDULED = ', obd_variable_name, obd_variable_time)
     s.enter(int(obd_variable_time), 1, collect_variable, (s,obd_variable_name, obd_variable_time))
 s.run()
+
 
 
 # Send a command

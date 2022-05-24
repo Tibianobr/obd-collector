@@ -2,8 +2,10 @@ import configparser as cp
 
 VARIABLE_SECTION = 'OBD_VARIABLES'
 DB_SECTION = 'DATABASE'
+FORCE_SECTION = 'FORCE_VARIABLES'
 
 VARIABLES_AND_TIME = {}
+FORCE_VARIABLES = []
 
 
 def get_config():
@@ -14,6 +16,13 @@ def get_config():
     # print(VARIABLES_AND_TIME)
     return VARIABLES_AND_TIME
 
+
+def get_force_variables():
+    config = cp.ConfigParser()
+    config.read('config.ini')
+    for var in config[FORCE_SECTION]:
+        FORCE_VARIABLES.append(var)
+    return FORCE_VARIABLES
 
 def get_db_name():
     config = cp.ConfigParser()
