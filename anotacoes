@@ -1,0 +1,9 @@
+UPDATE "data"
+SET value_as_number = value::numeric
+
+UPDATE "data"
+SET timestamp_as_tz  = "timestamp"::timestamptz
+
+alter table "data" add column value_as_number numeric;
+
+alter table "data" add column timestamp_as_tz timestamp;
